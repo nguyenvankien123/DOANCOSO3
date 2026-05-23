@@ -47,7 +47,7 @@ public class ProductController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Tải danh sách sản phẩm theo danh mục thành công", products));
     }
     
-    // =========================================================================
+   
     // 🟢 ĐÃ FIX CHUẨN PHÂN TRANG: Nhận keyword và bóc tách dữ liệu theo Page
     // =========================================================================
     @GetMapping("/search")
