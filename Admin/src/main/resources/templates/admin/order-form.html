@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Đơn hàng</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body class="p-3">
+<div th:replace="admin/header :: header"></div>
+<div class="container mt-4">
+    <h2>Chi tiết đơn hàng</h2>
+    <form th:action="@{/admin/orders/save}" th:object="${order}" method="post">
+        <div class="mb-3">
+            <label class="form-label">Trạng thái</label>
+            <select class="form-select" th:field="*{status}">
+                <option value="pending">Chờ xử lý</option>
+                <option value="delivered">Đã giao</option>
+                <option value="cancelled">Đã hủy</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Địa chỉ giao hàng</label>
+            <textarea class="form-control" th:field="*{shippingAddress}"></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Số điện thoại</label>
+            <input class="form-control" th:field="*{phoneNumber}" />
+        </div>
+        <h5>Chi tiết sản phẩm</h5>
+        <table class="table table-sm">
+            <thead><tr><th>Sản phẩm</th><th>Số lượng</th><th>Giá</th></tr></thead>
+            <tbody>
+            <tr th:each="it : ${order.orderItems}">
+                <td th:text="${it.product != null ? it.product.name : 'N/A'}"></td>
+                <td th:text="${it.quantity}"></td>
+                <td th:text="${it.price}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <button class="btn btn-primary">Lưu</button>
+        <a class="btn btn-secondary" href="/admin/orders">Hủy</a>
+    </form>
+</div>
+<div th:replace="admin/footer :: footer"></div>
+</body>
+</html>

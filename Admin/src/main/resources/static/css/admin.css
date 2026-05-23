@@ -1,0 +1,30 @@
+body {
+	background: #f4f6f9;
+	font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+	padding-bottom: 40px;
+}
+
+.card-text { font-size: 1.6rem; font-weight: 600; }
+
+.card-title{
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.navbar-brand {
+	font-weight: 700;
+}
+
+.container h2 {
+	margin-bottom: 0.5rem;
+}
+
+.table-hover tbody tr:hover {
+	background: rgba(0,0,0,0.03);
+}
+
+.card {
+	border-radius: 8px;
+}
+
+.btn-sm { padding: .35rem .6rem; }
