@@ -101,91 +101,79 @@ fun HomeScreen(
     Scaffold(
         containerColor = BgGray,
         bottomBar = {
-            Box(
+            // Thanh điều hướng phẳng phẳng cân xứng 4 nút tính năng
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(90.dp)
-                    .background(Color.Transparent)
+                    .height(70.dp),
+                shadowElevation = 16.dp,
+                color = Color.White
             ) {
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(70.dp)
-                        .align(Alignment.BottomCenter),
-                    shadowElevation = 16.dp,
-                    color = Color.White
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalArrangement = Arrangement.SpaceAround,
-                        verticalAlignment = Alignment.CenterVertically
+                    // NÚT 1: HOME
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { navController.navigate("home") }
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.weight(1f).clickable { navController.navigate("home") }
-                        ) {
-                            Icon(Icons.Default.Home, contentDescription = null, tint = PurpleMain)
-                            Text("Home", fontSize = 11.sp, color = PurpleMain, fontWeight = FontWeight.Medium)
-                        }
-
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clickable { navController.navigate("notifications") }
-                        ) {
-                            val unreadCount = notifications.count { !it.isRead }
-
-                            if (unreadCount > 0) {
-                                BadgedBox(
-                                    badge = {
-                                        Badge(containerColor = Color.Red, contentColor = Color.White) {
-                                            Text(unreadCount.toString())
-                                        }
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Notifications,
-                                        contentDescription = null,
-                                        tint = TextGray,
-                                    )
-                                }
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Notifications,
-                                    contentDescription = null,
-                                    tint = TextGray,
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text("Thông báo", fontSize = 11.sp, color = TextGray, fontWeight = FontWeight.Medium)
-                        }
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f).clickable { navController.navigate("cart") }) {
-                            Icon(Icons.Default.ShoppingCart, contentDescription = null, tint = TextGray)
-                            Text("Giỏ hàng", fontSize = 11.sp, color = TextGray)
-                        }
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f).clickable { navController.navigate("profileuser") }) {
-                            Icon(Icons.Default.AccountCircle, contentDescription = null, tint = TextGray)
-                            Text("Tôi", fontSize = 11.sp, color = TextGray)
-                        }
+                        Icon(Icons.Default.Home, contentDescription = null, tint = PurpleMain)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Home", fontSize = 11.sp, color = PurpleMain, fontWeight = FontWeight.Medium)
                     }
-                }
 
-                FloatingActionButton(
-                    onClick = { /* Action */ },
-                    shape = CircleShape,
-                    containerColor = PurpleMain,
-                    contentColor = Color.White,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .size(56.dp)
-                        .offset(y = 4.dp),
-                    elevation = FloatingActionButtonDefaults.elevation(8.dp)
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Scan", modifier = Modifier.size(26.dp))
+                    // NÚT 2: THÔNG BÁO
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { navController.navigate("notifications") }
+                    ) {
+                        val unreadCount = notifications.count { !it.isRead }
+                        if (unreadCount > 0) {
+                            BadgedBox(
+                                badge = {
+                                    Badge(containerColor = Color.Red, contentColor = Color.White) {
+                                        Text(unreadCount.toString())
+                                    }
+                                }
+                            ) {
+                                Icon(Icons.Default.Notifications, contentDescription = null, tint = TextGray)
+                            }
+                        } else {
+                            Icon(Icons.Default.Notifications, contentDescription = null, tint = TextGray)
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Thông báo", fontSize = 11.sp, color = TextGray, fontWeight = FontWeight.Medium)
+                    }
+
+                    // NÚT 3: GIỎ HÀNG
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { navController.navigate("cart") }
+                    ) {
+                        Icon(Icons.Default.ShoppingCart, contentDescription = null, tint = TextGray)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Giỏ hàng", fontSize = 11.sp, color = TextGray, fontWeight = FontWeight.Medium)
+                    }
+
+                    // NÚT 4: TÔI (CÁ NHÂN)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { navController.navigate("profileuser") }
+                    ) {
+                        Icon(Icons.Default.AccountCircle, contentDescription = null, tint = TextGray)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("Tôi", fontSize = 11.sp, color = TextGray, fontWeight = FontWeight.Medium)
+                    }
                 }
             }
         }
@@ -205,7 +193,7 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
-                // ITEM 1: Header màu tím
+                // ITEM 1: Header màu tím kèm thanh Search
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Box(
                         modifier = Modifier
@@ -228,20 +216,15 @@ fun HomeScreen(
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            // =========================================================================
-                            // 🟢 ĐÃ TÍCH HỢP ĐỒNG BỘ: Kết nối hàm searchProducts từ HomeViewModel
-                            // =========================================================================
                             OutlinedTextField(
                                 value = searchQuery,
                                 onValueChange = { newValue ->
                                     searchQuery = newValue
 
-                                    // Khi gõ chữ, tự động trả giao diện Category về nút "Tất cả" (0L) để tìm kiếm rộng
                                     if (newValue.isNotBlank() && selectedCatId != 0L) {
                                         productViewModel.selectCategory(0L)
                                     }
 
-                                    // Kích hoạt hàm tìm kiếm thời gian thực lên máy chủ Backend
                                     homeViewModel.searchProducts(newValue)
                                 },
                                 modifier = Modifier.fillMaxWidth(),
@@ -260,7 +243,7 @@ fun HomeScreen(
                     }
                 }
 
-                // ITEM 3: Mục Tiêu đề Categories
+                // ITEM 2: Mục Tiêu đề Categories
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Text(
                         text = "Loại Sản Phẩm",
@@ -270,7 +253,7 @@ fun HomeScreen(
                     )
                 }
 
-                // ITEM 4: HIỂN THỊ ICON CÁC DANH MỤC
+                // ITEM 3: HIỂN THỊ DANH MỤC SẢN PHẨM (LAZYROW)
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     LazyRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -282,7 +265,6 @@ fun HomeScreen(
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier.clickable {
-                                    // Xóa text tìm kiếm cũ khi người dùng chủ động chọn lại danh mục
                                     searchQuery = ""
                                     productViewModel.selectCategory(0L)
                                     homeViewModel.fetchProducts(0L)
@@ -318,7 +300,6 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .width(75.dp)
                                     .clickable {
-                                        // Xóa text tìm kiếm cũ khi chọn danh mục cụ thể
                                         searchQuery = ""
                                         productViewModel.selectCategory(cat.id)
                                         homeViewModel.fetchProducts(cat.id)
@@ -363,7 +344,7 @@ fun HomeScreen(
                     }
                 }
 
-                // ITEM 5: Tiêu đề Mục Popular Product
+                // ITEM 4: Tiêu đề Mục Popular Product
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     Row(
                         modifier = Modifier
@@ -376,7 +357,7 @@ fun HomeScreen(
                     }
                 }
 
-                // XỬ LÝ CÁC TRẠNG THÁI LOADING / ERROR / DANH SÁCH SẢN PHẨM REAL
+                // XỬ LÝ TRẠNG THÁI LOADING / ERROR / DANH SÁCH SẢN PHẨM
                 if (isProductsLoading) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
