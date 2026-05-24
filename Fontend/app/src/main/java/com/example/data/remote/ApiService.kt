@@ -27,11 +27,9 @@ interface ApiService {
     suspend fun register(@Body request: RegisterRequest): Response<ApiResponse<AuthResponse>>
 
     // --- PRODUCTS ---
+
     @GET("api/v1/products")
-    suspend fun getProducts(
-        @Query("page") page: Int = 0,
-        @Query("size") size: Int = 10
-    ): Response<ApiResponse<PaginatedProductResponse>>
+    suspend fun getProducts(): Response<ApiResponse<PaginatedProductResponse>>
 
     @GET("api/v1/products/{id}")
     suspend fun getProductDetail(
@@ -41,15 +39,14 @@ interface ApiService {
     suspend fun searchProducts(
         @Query("keyword") keyword: String,
         @Query("page") page: Int = 0,
-        @Query("size") size: Int = 10
+        @Query("size") size: Int = 15
     ): Response<ApiResponse<PaginatedProductResponse>>
 
     //  (CATEGORIES)
     @GET("api/v1/categories")
     suspend fun getAllCategories(): Response<ApiResponse<List<CategoryResponse>>>
 
-    @GET("api/v1/products")
-    suspend fun getProducts(): Response<ApiResponse<PaginatedProductResponse>>
+
     @GET("api/v1/products/category/{categoryId}")
     suspend fun getProductsByCategoryId(
         @Path("categoryId") categoryId: Long
