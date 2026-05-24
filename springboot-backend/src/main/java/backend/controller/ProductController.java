@@ -23,7 +23,7 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ProductResponse>>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "30") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<ProductResponse> products = productService.getAllProducts(pageable);
         return ResponseEntity.ok(new ApiResponse<>(true, "Products retrieved successfully", products));
@@ -39,7 +39,7 @@ public class ProductController {
     public ResponseEntity<ApiResponse<Page<ProductResponse>>> getProductsByCategory(
             @PathVariable Long categoryId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "15") int size) {
         
         Pageable pageable = PageRequest.of(page, size);
         Page<ProductResponse> products = productService.getProductsByCategoryId(categoryId, pageable);
@@ -48,13 +48,12 @@ public class ProductController {
     }
     
    
-    // 🟢 ĐÃ FIX CHUẨN PHÂN TRANG: Nhận keyword và bóc tách dữ liệu theo Page
-    // =========================================================================
+   
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<Page<ProductResponse>>> searchProducts(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "15") int size) {
         
         // 1. Khởi tạo đối tượng phân trang tự động
         Pageable pageable = PageRequest.of(page, size);
