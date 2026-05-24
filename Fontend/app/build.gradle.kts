@@ -64,7 +64,8 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     // Coil - Để tải hình ảnh sản phẩm từ URL hiển thị lên Compose
     implementation("io.coil-kt:coil-compose:2.6.0")
-    // ViewModel cho Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("io.coil-kt:coil-compose:2.6.0")
+    // Thêm thư viện kết nối hình ảnh Cloudinary
+    implementation("com.cloudinary:cloudinary-android:2.3.0")
 }
