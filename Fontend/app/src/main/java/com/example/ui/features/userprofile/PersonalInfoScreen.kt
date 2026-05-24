@@ -1,7 +1,10 @@
 package com.example.ui.features.userprofile
 
 import android.app.Application
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -28,6 +31,9 @@ import coil.compose.AsyncImage
 import com.example.data.remote.RetrofitClient
 import com.example.data.repository.ProfileRepository
 import com.example.ui.theme.*
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,16 +53,62 @@ fun PersonalInfoScreen(navController: NavController) {
     var email by userViewModel.email
     var phone by userViewModel.phone
     var address by userViewModel.address
-    var avatarUrlForm by userViewModel.avatar // Kết nối trực tiếp biến avatar mới của ViewModel
+    var avatarUrlForm by userViewModel.avatar
 
     val isLoading by userViewModel.isLoading
     val isSaving by userViewModel.isSaving
     val errorMessage by userViewModel.errorMessage
     val saveSuccessMsg by userViewModel.saveSuccessMsg
 
-    // Trạng thái quản lý đóng/mở hộp thoại nhập URL ảnh đại diện mới
-    var showAvatarDialog by remember { mutableStateOf(false) }
-    var tempAvatarUrl by remember { mutableStateOf("") }
+    // Trạng thái cục bộ để quản lý vòng xoay tiến trình khi đang upload ảnh lên Cloudinary
+    var isUploadingImage by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        try {
+            val config = mapOf(
+                "cloud_name" to "db1geruuv",
+                "secure" to true
+            )
+            com.cloudinary.android.MediaManager.init(context, config)
+        } catch (e: Exception) {
+        }
+
+        userViewModel.loadUserProfile()
+    }
+
+    // 🟢 BỘ PHÓNG ĐÒNG MỞ THƯ VIỆN ẢNH ĐIỆN THOẠI VÀ XỬ LÝ UPLOAD
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            isUploadingImage = true
+
+            // 🟢 ĐÃ FIX: Chỉ định gói com.cloudinary.android tường minh để tránh lỗi biên dịch Kotlin lambda
+            com.cloudinary.android.MediaManager.get().upload(uri)
+                .unsigned("Unsigned Upload Presets") // Cấu hình Preset Name chính xác của bạn
+                .callback(object : UploadCallback {
+                    override fun onStart(requestId: String?) {}
+                    override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
+
+                    override fun onSuccess(requestId: String?, resultData: Map<*, *>?) {
+                        // Trích xuất lấy chuỗi URL chữ an toàn (HTTPS) do Cloudinary trả về
+                        val secureUrl = resultData?.get("secure_url") as? String ?: ""
+
+                        // Cập nhật giá trị link trực tuyến này vào Form dữ liệu của ViewModel
+                        avatarUrlForm = secureUrl
+                        isUploadingImage = false
+                        Toast.makeText(context, "Đã nạp ảnh đại diện mới!", Toast.LENGTH_SHORT).show()
+                    }
+
+                    override fun onError(requestId: String?, error: ErrorInfo?) {
+                        isUploadingImage = false
+                        Toast.makeText(context, "Tải ảnh lên Đám mây thất bại!", Toast.LENGTH_SHORT).show()
+                    }
+
+                    override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
+                }).dispatch()
+        }
+    }
 
     LaunchedEffect(Unit) {
         userViewModel.loadUserProfile()
@@ -71,52 +123,6 @@ fun PersonalInfoScreen(navController: NavController) {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             userViewModel.errorMessage.value = null
         }
-    }
-
-    // 🔴 HỘP THOẠI ĐỔI URL AVATAR MỚI
-    if (showAvatarDialog) {
-        AlertDialog(
-            onDismissRequest = { showAvatarDialog = false },
-            title = {
-                Text(
-                    "Thay đổi ảnh đại diện",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        "Nhập đường dẫn URL ảnh mới của bạn:",
-                        fontSize = 13.sp,
-                        color = Color.Gray
-                    )
-                    OutlinedTextField(
-                        value = tempAvatarUrl,
-                        onValueChange = { tempAvatarUrl = it },
-                        placeholder = { Text("https://example.com/image.png") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        avatarUrlForm = tempAvatarUrl // Cập nhật link tạm vào link chính Form
-                        showAvatarDialog = false
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = PurpleMain)
-                ) {
-                    Text("Áp dụng", color = Color.White)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showAvatarDialog = false }) {
-                    Text("Hủy", color = Color.Gray)
-                }
-            }
-        )
     }
 
     Scaffold(
@@ -162,7 +168,7 @@ fun PersonalInfoScreen(navController: NavController) {
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // PHẦN 1: Hiển thị Avatar (Sẽ thay đổi ngay khi bạn nhập URL mới vào hộp thoại)
+                // PHẦN 1: Hiển thị Avatar (Đọc trực tiếp link text trong cơ sở dữ liệu)
                 Box(
                     contentAlignment = Alignment.BottomEnd,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -194,25 +200,34 @@ fun PersonalInfoScreen(navController: NavController) {
                         }
                     }
 
-                    // Nút bấm sửa ảnh đại diện
+                    // 🟢 NÚT BẤM CÂY BÚT: Đã gỡ bỏ Dialog cũ, ấn vào tự bật Gallery chọn tệp luôn
                     Box(
                         modifier = Modifier
                             .size(30.dp)
                             .clip(CircleShape)
                             .background(PurpleMain)
                             .clickable {
-                                tempAvatarUrl =
-                                    avatarUrlForm // Gán link hiện tại vào ô nhập mặc định
-                                showAvatarDialog = true // Mở hộp thoại nhập link
+                                if (!isUploadingImage) {
+                                    imagePickerLauncher.launch("image/*") // Kích hoạt nạp bộ chọn ảnh Android
+                                }
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            Icons.Default.Edit,
-                            contentDescription = "Edit Photo",
-                            tint = Color.White,
-                            modifier = Modifier.size(14.dp)
-                        )
+                        if (isUploadingImage) {
+                            // Quay vòng tròn nhỏ báo hiệu đang tải ảnh lên Cloud
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                modifier = Modifier.size(14.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = "Edit Photo",
+                                tint = Color.White,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
                     }
                 }
 
@@ -353,15 +368,16 @@ fun PersonalInfoScreen(navController: NavController) {
                         onClick = {
                             userViewModel.updateUserProfile(
                                 onSuccess = {
-                                    Toast.makeText(context, "Đã lưu thay đổi!", Toast.LENGTH_SHORT)
+                                    Toast.makeText(context, "Đã lưu thay đổi thành công!", Toast.LENGTH_SHORT)
                                         .show()
                                     navController.popBackStack()
                                 }
                             )
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = PurpleMain)
                     ) {
-                        Text("LƯU THAY ĐỔI")
+                        Text("LƯU THAY ĐỔI", color = Color.White)
                     }
 
                     Spacer(modifier = Modifier.height(24.dp))
